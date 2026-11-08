@@ -1,0 +1,261 @@
+@import "tailwindcss";
+
+/*
+  Identitas mengikuti aplikasinya (tema "Soft Café"): latar espresso, teks krim,
+  aksen karamel untuk aksi unduh, sage sebagai warna kedua yang hemat.
+  Tema gelap tetap karena itu memang tampilan asli BrewLogic.
+*/
+@theme inline {
+  --color-espresso: #15100c;
+  --color-roast: #1e1611;
+  --color-mocha: #3a2e26;
+  --color-cream: #f3eadd;
+  --color-cream-soft: #bfb4a6;
+  --color-caramel: #d9a566;
+  --color-caramel-deep: #b98847;
+  --color-sage: #a8bfa0;
+  --color-on-accent: #1a110b;
+
+  --font-display: var(--font-pixelify);
+  --font-sans: var(--font-dmsans);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------ */
+/* Latar: cahaya karamel dan sage + cincin cangkir, seperti di aplikasi. */
+/* ------------------------------------------------------------------ */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: var(--color-espresso);
+}
+
+.glow {
+  position: absolute;
+  border-radius: 9999px;
+}
+
+.glow-a {
+  top: -140px;
+  left: -120px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgb(217 165 102 / 0.26), transparent 68%);
+}
+
+.glow-b {
+  top: 260px;
+  right: -180px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgb(168 191 160 / 0.11), transparent 68%);
+}
+
+.glow-c {
+  bottom: -160px;
+  left: -80px;
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle, rgb(217 165 102 / 0.15), transparent 68%);
+}
+
+.ambient-rings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Tombol unduh: isi karamel gelap menyapu dari kiri saat hover atau fokus. */
+.sweep {
+  background-image: linear-gradient(var(--color-caramel-deep), var(--color-caramel-deep));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  transition: background-size 220ms ease-out;
+}
+
+.sweep:hover,
+.sweep:focus-visible {
+  background-size: 100% 100%;
+}
+
+/* Cincin riak di belakang cangkir. Tanpa animasi, tampil sebagai cincin statis. */
+.ripple {
+  opacity: calc(0.34 - var(--i, 0) * 0.08);
+}
+
+/* ------------------------------------------------------------------ */
+/* Gerak. Loop (riak, animasi menuang) bisa dijeda lewat tombol; semua   */
+/* gerak mati bila pengguna meminta gerak minim.                          */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ripple-out {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  .ripple {
+    animation: ripple-out 7.5s ease-out infinite;
+    animation-delay: calc(var(--i, 0) * 2.5s);
+  }
+
+  html[data-motion="paused"] .ripple {
+    animation-play-state: paused;
+  }
+
+  /* Teks hero naik satu kali saat halaman dibuka. */
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .rise {
+    animation: rise 640ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Cahaya latar bergeser mengikuti scroll, bukan berputar sendiri. */
+    @keyframes glow-a-move {
+      to {
+        transform: translate(70px, 320px);
+      }
+    }
+    @keyframes glow-b-move {
+      to {
+        transform: translate(-90px, -240px);
+      }
+    }
+    @keyframes glow-c-move {
+      to {
+        transform: translate(140px, -340px);
+      }
+    }
+
+    .glow-a {
+      animation: glow-a-move linear both;
+      animation-timeline: scroll(root);
+    }
+    .glow-b {
+      animation: glow-b-move linear both;
+      animation-timeline: scroll(root);
+    }
+    .glow-c {
+      animation: glow-c-move linear both;
+      animation-timeline: scroll(root);
+    }
+
+    @keyframes reveal-in {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+
+    /* Baris metode dan roasting bergeser berlawanan arah saat lewat layar. */
+    @keyframes drift-left {
+      from {
+        transform: translateX(6vw);
+      }
+      to {
+        transform: translateX(-26vw);
+      }
+    }
+    @keyframes drift-right {
+      from {
+        transform: translateX(-30vw);
+      }
+      to {
+        transform: translateX(2vw);
+      }
+    }
+
+    .drift-left {
+      animation: drift-left linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+    .drift-right {
+      animation: drift-right linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 1rem;
+  }
+
+  body {
+    background: var(--color-espresso);
+    color: var(--color-cream);
+    font-family: var(--font-dmsans), system-ui, sans-serif;
+  }
+
+  a[href],
+  button:not(:disabled),
+  summary,
+  select,
+  label[for] {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-caramel);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-caramel);
+    color: var(--color-on-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
