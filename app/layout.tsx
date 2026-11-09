@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Pixelify_Sans } from "next/font/google";
 import { MotionToggle } from "@/components/MotionToggle";
+import { PlatformHint } from "@/components/PlatformHint";
 import "./globals.css";
 
 // Pixelify Sans: font display yang sama dengan aplikasinya, untuk judul dan angka besar.
@@ -55,7 +56,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <AmbientBackground />
         {children}
-        <MotionToggle />
+        <PlatformHint />
+        <MotionToggle className="fixed bottom-4 right-4 z-50 hidden md:inline-flex" />
       </body>
     </html>
   );

@@ -3,7 +3,7 @@ import type { ReleaseInfo } from "@/lib/releases";
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="rounded-xl bg-espresso/60 px-3 py-2.5 md:rounded-none md:bg-transparent md:p-0">
       <dt className="text-sm text-cream-soft">{label}</dt>
       <dd className="mt-0.5 font-medium text-cream">{value}</dd>
     </div>
@@ -22,7 +22,7 @@ export function DownloadButton({
       <button
         type="button"
         disabled
-        className="flex min-h-12 w-full cursor-not-allowed items-center justify-center rounded-md border border-cream/25 px-5 py-2 font-medium text-cream-soft"
+        className="flex min-h-14 w-full cursor-not-allowed items-center justify-center rounded-xl border border-cream/25 px-5 py-2 font-medium text-cream-soft"
       >
         {release.format} belum tersedia
       </button>
@@ -33,7 +33,7 @@ export function DownloadButton({
     <a
       href={release.href}
       download
-      className="sweep flex min-h-12 w-full items-center justify-center gap-3 rounded-md bg-caramel px-5 py-2.5 text-left font-medium text-on-accent active:translate-y-px"
+      className={`dl-${release.platform} sweep flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-caramel px-5 py-2.5 text-left font-medium text-on-accent active:translate-y-px`}
     >
       <svg
         aria-hidden="true"
@@ -69,7 +69,7 @@ export function DownloadRow({ release }: { release: ReleaseInfo }) {
   return (
     <article
       aria-labelledby={id}
-      className="reveal grid gap-6 border-t border-cream/20 py-8 md:grid-cols-12 md:items-center md:gap-8"
+      className={`pf-${release.platform} reveal grid gap-5 rounded-2xl border border-cream/15 bg-roast p-5 md:grid-cols-12 md:items-center md:gap-8 md:rounded-none md:border-0 md:border-t md:border-cream/20 md:bg-transparent md:px-0 md:py-8`}
     >
       <div className="flex items-center gap-4 md:col-span-4">
         <Image
@@ -90,7 +90,7 @@ export function DownloadRow({ release }: { release: ReleaseInfo }) {
       </div>
 
       {ready ? (
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-4 md:col-span-4">
+        <dl className="grid grid-cols-2 gap-2.5 md:col-span-4 md:gap-x-6 md:gap-y-4">
           <Fact label="Versi" value={release.version ?? "-"} />
           <Fact label="Persyaratan" value={release.requirement} />
           <Fact label="Ukuran" value={release.size ?? "-"} />

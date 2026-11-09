@@ -13,8 +13,17 @@ function subscribe(onChange: () => void) {
 
 const isPaused = () => document.documentElement.dataset.motion === "paused";
 
-/** Menjeda animasi yang berulang (riak dan animasi menuang). Wajib ada karena geraknya lebih dari 5 detik. */
-export function MotionToggle() {
+/**
+ * Menjeda animasi yang berulang (riak dan animasi menuang). Wajib ada karena geraknya
+ * lebih dari 5 detik. `compact` hanya menampilkan ikon (dipakai di header layar kecil).
+ */
+export function MotionToggle({
+  compact = false,
+  className = "",
+}: {
+  compact?: boolean;
+  className?: string;
+}) {
   const paused = useSyncExternalStore(subscribe, isPaused, () => false);
 
   // Pengguna yang meminta gerak minim memulai dalam keadaan jeda.
@@ -24,30 +33,30 @@ export function MotionToggle() {
     }
   }, []);
 
+  const label = paused ? "Putar animasi" : "Jeda animasi";
+
   return (
     <button
       type="button"
       aria-pressed={paused}
+      aria-label={compact ? label : undefined}
       onClick={() => {
         document.documentElement.dataset.motion = paused ? "play" : "paused";
       }}
-      className="fixed bottom-4 right-4 z-50 inline-flex h-11 items-center gap-2.5 rounded-md border border-cream/30 bg-roast px-4 text-sm font-medium text-cream transition-colors hover:border-caramel hover:text-caramel active:translate-y-px"
+      className={`items-center justify-center gap-2.5 rounded-xl border border-cream/30 bg-roast text-sm font-medium text-cream transition-colors hover:border-caramel hover:text-caramel active:translate-y-px ${
+        compact ? "size-11" : "h-11 px-4"
+      } ${className}`}
     >
-      <span
+      <svg
         aria-hidden="true"
-        className="relative block h-3 w-3 text-current"
+        viewBox="0 0 12 12"
+        width="12"
+        height="12"
+        fill="currentColor"
       >
-        {paused ? (
-          <svg viewBox="0 0 12 12" fill="currentColor">
-            <path d="M2 1v10l9-5z" />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 12 12" fill="currentColor">
-            <path d="M2 1h3v10H2zM7 1h3v10H7z" />
-          </svg>
-        )}
-      </span>
-      {paused ? "Putar animasi" : "Jeda animasi"}
+        {paused ? <path d="M2 1v10l9-5z" /> : <path d="M2 1h3v10H2zM7 1h3v10H7z" />}
+      </svg>
+      {!compact && label}
     </button>
   );
 }

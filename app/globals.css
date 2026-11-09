@@ -85,6 +85,35 @@
   background-size: 100% 100%;
 }
 
+/* Perangkat pengunjung (diisi PlatformHint): unduhan yang cocok tampil lebih dulu dan berisi,
+   unduhan lainnya jadi tombol garis. Di desktop (data-platform "other") keduanya berisi. */
+html[data-platform="ios"] .pf-ios,
+html[data-platform="android"] .pf-android {
+  order: -1;
+}
+
+html[data-platform="android"] .dl-ios,
+html[data-platform="ios"] .dl-android {
+  background-color: transparent;
+  background-image: none;
+  color: var(--color-cream);
+  box-shadow: inset 0 0 0 1.5px rgb(243 234 221 / 0.4);
+}
+
+html[data-platform="android"] .dl-ios:hover,
+html[data-platform="ios"] .dl-android:hover {
+  color: var(--color-caramel);
+  box-shadow: inset 0 0 0 1.5px var(--color-caramel);
+}
+
+/* Barisan geser horizontal tanpa scrollbar (kartu fitur di layar kecil). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Cincin riak di belakang cangkir. Tanpa animasi, tampil sebagai cincin statis. */
 .ripple {
   opacity: calc(0.34 - var(--i, 0) * 0.08);
@@ -180,6 +209,15 @@
       animation: reveal-in linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 45%;
+    }
+
+    /* Seperti .reveal, tapi hanya di layar lebar: di layar kecil kartunya ada dalam barisan geser. */
+    @media (min-width: 1024px) {
+      .reveal-lg {
+        animation: reveal-in linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 45%;
+      }
     }
 
     /* Baris metode dan roasting bergeser berlawanan arah saat lewat layar. */

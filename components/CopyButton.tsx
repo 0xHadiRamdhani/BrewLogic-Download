@@ -26,7 +26,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
         type="button"
         onClick={copy}
         aria-label={`Salin SHA-256 ${label}`}
-        className="h-11 shrink-0 rounded-md border border-cream/40 px-4 text-sm font-medium text-cream transition-colors hover:border-caramel hover:text-caramel active:translate-y-px"
+        className="h-11 shrink-0 rounded-xl border border-cream/40 px-4 text-sm font-medium text-cream transition-colors hover:border-caramel hover:text-caramel active:translate-y-px"
       >
         {text}
       </button>

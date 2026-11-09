@@ -51,7 +51,7 @@ export const RELEASES: ReleaseConfig[] = [
 
 const sizeFormat = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 });
 const dateFormat = new Intl.DateTimeFormat("id-ID", {
-  dateStyle: "long",
+  dateStyle: "medium",
   timeZone: "Asia/Jakarta",
 });
 
