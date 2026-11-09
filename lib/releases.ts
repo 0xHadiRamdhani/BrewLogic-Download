@@ -24,7 +24,7 @@ export type ReleaseInfo = ReleaseConfig & {
   sha256?: string;
 };
 
-// Sumber: pubspec.yaml (1.1.0+2), Info.plist IPA (MinimumOSVersion 15.0),
+// Sumber: pubspec.yaml (1.2.0+3), Info.plist IPA (MinimumOSVersion 15.0),
 // dan AndroidManifest APK (minSdkVersion 24 = Android 7.0).
 export const RELEASES: ReleaseConfig[] = [
   {
@@ -32,7 +32,7 @@ export const RELEASES: ReleaseConfig[] = [
     name: "Android",
     format: "APK",
     fileName: "brewlogic.apk",
-    version: "1.1.0 (build 2)",
+    version: "1.2.0 (build 3)",
     requirement: "Android 7.0+",
   },
   {
@@ -40,7 +40,7 @@ export const RELEASES: ReleaseConfig[] = [
     name: "iPhone",
     format: "IPA",
     fileName: "brewlogic.ipa",
-    version: "1.1.0 (build 2)",
+    version: "1.2.0 (build 3)",
     requirement: "iOS 15.0+",
   },
 ];
