@@ -1,38 +1,41 @@
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
-import { createHash } from "node:crypto";
-import path from "node:path";
 import { cacheLife } from "next/cache";
+import {
+  findAsset,
+  formatTag,
+  sha256FromDigest,
+  type GithubRelease,
+} from "@/lib/github-release";
+
+// Berkas APK dan IPA tidak disimpan di repo atau public/. Keduanya diunggah
+// sebagai aset GitHub Release di repo ini, lalu dibaca lewat GitHub API.
+const REPO = "0xHadiRamdhani/BrewLogic-Download";
 
 export type ReleaseConfig = {
   platform: "android" | "ios";
   name: string;
   format: "APK" | "IPA";
-  /** Nama berkas di folder public/download/ */
+  /** Nama aset di GitHub Release, harus persis sama. */
   fileName: string;
-  /** Versi aplikasi, diambil dari pubspec.yaml dan metadata berkas rilis. */
-  version: string;
-  /** Persyaratan sistem minimum, diambil dari metadata berkas rilis. */
+  /** Persyaratan sistem minimum, dari manifest APK (minSdk 24) dan Info.plist IPA (15.0). */
   requirement: string;
 };
 
 export type ReleaseInfo = ReleaseConfig & {
-  href: string;
   status: "ready" | "missing" | "error";
+  href?: string;
+  /** Dari tag rilis, mis. "v1.2.0+3" menjadi "1.2.0 (build 3)". */
+  version?: string;
   size?: string;
   updatedAt?: string;
   sha256?: string;
 };
 
-// Sumber: pubspec.yaml (1.2.0+3), Info.plist IPA (MinimumOSVersion 15.0),
-// dan AndroidManifest APK (minSdkVersion 24 = Android 7.0).
 export const RELEASES: ReleaseConfig[] = [
   {
     platform: "android",
     name: "Android",
     format: "APK",
     fileName: "brewlogic.apk",
-    version: "1.2.0 (build 3)",
     requirement: "Android 7.0+",
   },
   {
@@ -40,12 +43,9 @@ export const RELEASES: ReleaseConfig[] = [
     name: "iPhone",
     format: "IPA",
     fileName: "brewlogic.ipa",
-    version: "1.2.0 (build 3)",
     requirement: "iOS 15.0+",
   },
 ];
-
-const DOWNLOAD_DIR = path.join(process.cwd(), "public", "download");
 
 const sizeFormat = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 });
 const dateFormat = new Intl.DateTimeFormat("id-ID", {
@@ -59,40 +59,54 @@ function formatSize(bytes: number) {
   return `${sizeFormat.format(bytes / 1024)} KB`;
 }
 
-function sha256Of(file: string) {
-  return new Promise<string>((resolve, reject) => {
-    const hash = createHash("sha256");
-    createReadStream(file)
-      .on("error", reject)
-      .on("data", (chunk) => hash.update(chunk))
-      .on("end", () => resolve(hash.digest("hex")));
-  });
-}
+type LatestRelease =
+  | { state: "ok"; release: GithubRelease }
+  | { state: "missing" | "error" };
 
-async function readRelease(config: ReleaseConfig): Promise<ReleaseInfo> {
-  const base = { ...config, href: `/download/${config.fileName}` };
-  const file = path.join(DOWNLOAD_DIR, config.fileName);
-
+async function fetchLatestRelease(): Promise<LatestRelease> {
+  // GITHUB_TOKEN opsional, hanya untuk menaikkan batas permintaan API (60 per jam tanpa token).
+  const token = process.env.GITHUB_TOKEN;
   try {
-    const info = await stat(file);
-    if (!info.isFile()) return { ...base, status: "missing" };
-    return {
-      ...base,
-      status: "ready",
-      size: formatSize(info.size),
-      updatedAt: dateFormat.format(info.mtime),
-      sha256: await sha256Of(file),
-    };
-  } catch (error) {
-    const missing = (error as NodeJS.ErrnoException).code === "ENOENT";
-    return { ...base, status: missing ? "missing" : "error" };
+    const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.status === 404) return { state: "missing" };
+    if (!res.ok) return { state: "error" };
+    return { state: "ok", release: (await res.json()) as GithubRelease };
+  } catch {
+    return { state: "error" };
   }
 }
 
-// Dicache karena membaca disk dianggap data runtime oleh Cache Components.
-// Berkas baru di public/download/ terbaca lagi saat cache kedaluwarsa (jam).
-export async function getReleases() {
+// Dicache karena fetch eksternal dianggap data runtime oleh Cache Components.
+// Rilis baru muncul setelah cache kedaluwarsa: 1 jam bila semua berkas ada,
+// 1 menit bila ada yang belum tersedia supaya rilis pertama cepat terbaca.
+export async function getReleases(): Promise<ReleaseInfo[]> {
   "use cache";
-  cacheLife("hours");
-  return Promise.all(RELEASES.map(readRelease));
+
+  const latest = await fetchLatestRelease();
+
+  const releases = RELEASES.map((config): ReleaseInfo => {
+    if (latest.state !== "ok") return { ...config, status: latest.state };
+    const asset = findAsset(latest.release, config.fileName);
+    if (!asset) return { ...config, status: "missing" };
+    return {
+      ...config,
+      status: "ready",
+      href: asset.browser_download_url,
+      version: formatTag(latest.release.tag_name),
+      size: formatSize(asset.size),
+      updatedAt: dateFormat.format(new Date(asset.updated_at)),
+      sha256: sha256FromDigest(asset.digest),
+    };
+  });
+
+  if (releases.every((r) => r.status === "ready")) cacheLife("hours");
+  else cacheLife("minutes");
+  return releases;
 }

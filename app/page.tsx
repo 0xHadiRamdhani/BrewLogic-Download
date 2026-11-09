@@ -155,8 +155,9 @@ export default async function Home() {
             </div>
 
             <p className="rise mt-5 text-sm text-cream-soft" style={idx(5)}>
-              Versi {android.version}. Offline dan tanpa akun, semua data
-              tersimpan di perangkatmu.{" "}
+              {(android.version ?? ios.version) &&
+                `Versi ${android.version ?? ios.version}. `}
+              Offline dan tanpa akun, semua data tersimpan di perangkatmu.{" "}
               <a
                 href="#unduh"
                 className="inline-flex h-11 items-center text-cream underline underline-offset-4 hover:text-caramel"
@@ -271,8 +272,9 @@ export default async function Home() {
             Unduh BrewLogic
           </h2>
           <p className="mt-4 max-w-xl text-cream-soft">
-            Android memakai berkas APK, iPhone memakai berkas IPA. Ukuran dan
-            tanggal dibaca dari berkas yang kamu unduh.
+            Android memakai berkas APK, iPhone memakai berkas IPA. Berkas
+            diunduh dari GitHub Releases, lengkap dengan ukuran, tanggal, dan
+            SHA-256 dari rilis tersebut.
           </p>
           <div className="mt-10 border-b border-cream/20">
             <DownloadRow release={android} />
@@ -371,7 +373,9 @@ export default async function Home() {
                       </p>
                     ) : (
                       <p className="mt-3 text-sm text-cream-soft">
-                        Nilai SHA-256 muncul setelah berkas {release.format} tersedia.
+                        {release.status === "ready"
+                          ? `GitHub belum menyediakan SHA-256 untuk berkas ${release.format} ini.`
+                          : `Nilai SHA-256 muncul setelah berkas ${release.format} tersedia.`}
                       </p>
                     )}
                   </li>

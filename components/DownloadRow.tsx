@@ -91,7 +91,7 @@ export function DownloadRow({ release }: { release: ReleaseInfo }) {
 
       {ready ? (
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4 md:col-span-4">
-          <Fact label="Versi" value={release.version} />
+          <Fact label="Versi" value={release.version ?? "-"} />
           <Fact label="Persyaratan" value={release.requirement} />
           <Fact label="Ukuran" value={release.size ?? "-"} />
           <Fact label="Diperbarui" value={release.updatedAt ?? "-"} />
@@ -100,7 +100,7 @@ export function DownloadRow({ release }: { release: ReleaseInfo }) {
         <p role="status" className="text-cream-soft md:col-span-4">
           {release.status === "missing"
             ? `Berkas ${release.format} belum diunggah. Silakan kembali beberapa saat lagi.`
-            : `Berkas ${release.format} tidak bisa dibaca saat ini. Silakan muat ulang halaman nanti.`}
+            : `Data rilis ${release.format} gagal dimuat dari GitHub. Silakan muat ulang halaman beberapa saat lagi.`}
         </p>
       )}
 

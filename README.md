@@ -16,14 +16,29 @@ npm run dev
 
 ## Merilis versi baru
 
-1. Build ulang aplikasinya di proyek Flutter, lalu salin hasilnya ke
-   `public/download/` dengan nama persis `brewlogic.apk` dan `brewlogic.ipa`.
-2. Perbarui `version` dan `requirement` di `RELEASES` pada `lib/releases.ts`
-   (versi ada di `pubspec.yaml`, persyaratan di Info.plist IPA dan manifest APK).
-3. Ukuran, tanggal, dan SHA-256 dibaca otomatis dari berkas. Hasilnya dicache satu
-   jam, jadi setelah mengganti berkas jalankan ulang server atau build ulang.
+APK dan IPA tidak disimpan di repo atau di `public/`. Keduanya diunggah sebagai aset
+GitHub Release di repo `0xHadiRamdhani/BrewLogic-Download`, dan situs membaca data
+rilis terbaru lewat GitHub API.
 
-Jika berkas belum ada, kartunya menampilkan "belum tersedia".
+1. Build aplikasinya di proyek Flutter.
+2. Buka halaman Releases repo ini, pilih **Draft a new release**.
+3. Isi tag dengan format `v<versi>+<build>` sesuai `pubspec.yaml`, mis. `v1.2.0+3`.
+   Situs menampilkannya sebagai "1.2.0 (build 3)". Tag tanpa `+build` juga boleh.
+4. Unggah dua berkas dengan nama persis `brewlogic.apk` dan `brewlogic.ipa`, lalu
+   **Publish release** (bukan draft atau pre-release).
+5. Situs memperbarui diri: tombol unduh menuju CDN GitHub, sedangkan ukuran, tanggal,
+   dan SHA-256 diambil dari aset. Hasil dicache 1 jam (1 menit selama ada berkas yang
+   belum tersedia). Untuk memaksa segera, jalankan ulang server atau deploy ulang.
+
+Persyaratan sistem (Android 7.0+, iOS 15.0+) ada di `RELEASES` pada `lib/releases.ts`
+dan perlu diubah manual jika minimum SDK aplikasi berubah.
+
+Sebelum rilis pertama dipublikasikan, kartu unduhan menampilkan "belum tersedia".
+
+### Opsional
+
+`GITHUB_TOKEN` di `.env.local` menaikkan batas permintaan GitHub API dari 60 per jam
+ke 5.000 per jam. Token cukup hak baca publik, tanpa scope tambahan.
 
 ## Animasi
 

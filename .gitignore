@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# berkas rilis tidak disimpan di repo; diunggah ke GitHub Releases
+/public/download/
+*.apk
+*.ipa
