@@ -12,14 +12,34 @@ export type GithubAsset = {
 
 export type GithubRelease = {
   tag_name: string;
+  name?: string | null;
+  body?: string | null;
   assets: GithubAsset[];
 };
 
-/** "v1.2.0+3" menjadi "1.2.0 (build 3)", "v1.2.0" menjadi "1.2.0". */
-export function formatTag(tag: string) {
-  const match = /^v?(\d+(?:\.\d+)*)(?:\+(\d+))?$/.exec(tag.trim());
-  if (!match) return tag.replace(/^v/, "");
-  return match[2] ? `${match[1]} (build ${match[2]})` : match[1];
+function formatVersion(version: string, build?: string) {
+  return build ? `${version} (build ${build})` : version;
+}
+
+/** Mencari versi seperti "v1.2.0+3" atau "1.2.0" di dalam teks, mis. judul atau catatan rilis. */
+export function parseVersion(text?: string | null) {
+  const match = /(?<![\w.])v?(\d+\.\d+(?:\.\d+)*)(?:\+(\d+))?(?![\w.])/.exec(text ?? "");
+  return match ? formatVersion(match[1], match[2]) : undefined;
+}
+
+/** Membaca baris `version: 1.2.0+3` dari pubspec.yaml. */
+export function versionFromPubspec(yaml?: string | null) {
+  const line = /^version:\s*(\S+)/m.exec(yaml ?? "");
+  return line ? parseVersion(line[1]) : undefined;
+}
+
+/** Versi dari tag, lalu judul, lalu catatan rilis. Tag seperti "ReleaseLatest" tidak punya versi. */
+export function versionFromRelease(release: GithubRelease) {
+  return (
+    parseVersion(release.tag_name) ??
+    parseVersion(release.name) ??
+    parseVersion(release.body)
+  );
 }
 
 export function findAsset(release: GithubRelease, fileName: string) {

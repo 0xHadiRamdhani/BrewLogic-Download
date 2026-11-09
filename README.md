@@ -16,24 +16,29 @@ npm run dev
 
 ## Merilis versi baru
 
-APK dan IPA tidak disimpan di repo atau di `public/`. Keduanya diunggah sebagai aset
-GitHub Release di repo `0xHadiRamdhani/BrewLogic-Download`, dan situs membaca data
-rilis terbaru lewat GitHub API.
+APK dan IPA tidak disimpan di repo ini atau di `public/`. Keduanya adalah aset GitHub
+Release `ReleaseLatest` di repo aplikasinya, `0xHadiRamdhani/BrewLogic`, dan situs
+membaca data rilis itu lewat GitHub API
+(<https://github.com/0xHadiRamdhani/BrewLogic/releases/tag/ReleaseLatest>).
 
-1. Build aplikasinya di proyek Flutter.
-2. Buka halaman Releases repo ini, pilih **Draft a new release**.
-3. Isi tag dengan format `v<versi>+<build>` sesuai `pubspec.yaml`, mis. `v1.2.0+3`.
-   Situs menampilkannya sebagai "1.2.0 (build 3)". Tag tanpa `+build` juga boleh.
-4. Unggah dua berkas dengan nama persis `brewlogic.apk` dan `brewlogic.ipa`, lalu
-   **Publish release** (bukan draft atau pre-release).
-5. Situs memperbarui diri: tombol unduh menuju CDN GitHub, sedangkan ukuran, tanggal,
+1. Naikkan `version` di `pubspec.yaml` dan build aplikasinya.
+2. Pada release `ReleaseLatest`, ganti aset dengan `brewlogic.apk` dan `brewlogic.ipa`
+   baru. Nama harus persis, dan release tidak boleh draft.
+3. Situs memperbarui diri: tombol unduh menuju CDN GitHub, sedangkan ukuran, tanggal,
    dan SHA-256 diambil dari aset. Hasil dicache 1 jam (1 menit selama ada berkas yang
    belum tersedia). Untuk memaksa segera, jalankan ulang server atau deploy ulang.
 
-Persyaratan sistem (Android 7.0+, iOS 15.0+) ada di `RELEASES` pada `lib/releases.ts`
-dan perlu diubah manual jika minimum SDK aplikasi berubah.
+Versi yang tampil dicari berurutan di: tag, judul, lalu catatan rilis (mis. judul
+"v1.2.0+3"), dan jika tidak ada, dari `pubspec.yaml` di branch utama repo aplikasi.
+Karena tag `ReleaseLatest` tidak memuat versi, saat ini versi berasal dari pubspec.
+Itu benar selama rilis diunggah setelah versi dinaikkan.
 
-Sebelum rilis pertama dipublikasikan, kartu unduhan menampilkan "belum tersedia".
+Repo, tag, dan nama aset diatur di `lib/releases.ts` (`REPO`, `RELEASE_TAG`,
+`RELEASES`). Persyaratan sistem (Android 7.0+, iOS 15.0+) juga ada di sana dan perlu
+diubah manual jika minimum SDK aplikasi berubah.
+
+Jika rilis tidak ditemukan atau GitHub tidak bisa dijangkau, kartu unduhan
+menampilkan "belum tersedia" atau pesan gagal memuat.
 
 ### Opsional
 
